@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음성 샘플 데모</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .play-button.playing {
+            background-color: #F59E0B; /* Amber 500 */
+        }
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="loading-overlay">
+        <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p id="loading-text" class="text-lg font-medium text-gray-700">오디오 파일을 로딩 중입니다...</p>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">음성 샘플 데모</h1>
+            <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 들어보세요.</p>
+        </header>
+
+        <div id="sample-container" class="space-y-6">
+            <!-- 샘플 데이터가 여기에 동적으로 추가됩니다. -->
+        </div>
+    </div>
+
+    <script>
+        // --- 오디오 및 UI 컨트롤 스크립트 ---
+
+        let currentlyPlaying = null; 
+        let isToneStarted = false;
+
+        // ✅ 중요: 여기에 각 샘플의 정보를 수동으로 입력하세요.
+        const samples = [
+            {
+                id: 1,
+                name: '샘플 01',
+                files: {
+                    '원본':   'audio/sample01/mos_erroneous_wav.wav',
+                    '모델 1': 'audio/sample01/mos_corrected_wav_with_midi.wav',
+                    '모델 2': 'audio/sample01/mos_melodyne_wav_with_midi_mono.wav',
+                    '모델 3': 'audio/sample01/mos_autotune_wav_with_midi_mono.wav',
+                }
+            },
+            {
+                id: 2,
+                name: '샘플 02',
+                files: {
+                    '원본':   'audio/sample02/mos_erroneous_wav.wav',
+                    '모델 1': 'audio/sample02/mos_corrected_wav_with_midi.wav',
+                    '모델 2': 'audio/sample02/mos_melodyne_wav_with_midi_mono.wav',
+                    '모델 3': 'audio/sample02/mos_autotune_wav_with_midi_mono.wav',
+                }
+            },
+            // ... 추가 샘플 ...
+        ];
+
+        const fileMap = {};
+        samples.forEach(sample => {
+            for (const modelName in sample.files) {
+                const key = `${sample.id}-${modelName}`;
+                fileMap[key] = sample.files[modelName];
+            }
+        });
+        
+        // ✅ 디버깅 기능 추가: 로딩 타임아웃 설정
+        const loadingTimeout = setTimeout(() => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay.style.display !== 'none') {
+                document.getElementById('loading-text').innerHTML = '오디오 로딩 실패. <br>F12를 눌러 개발자 도구의 Console 탭을 확인하세요.';
+                console.error("--- 오디오 파일 로딩 실패 ---");
+                console.error("아래 목록의 파일 경로가 정확한지, 파일이 실제로 존재하는지 확인해주세요.");
+                
+                for (const key in fileMap) {
+                    const player = players.player(key);
+                    if (!player.loaded) {
+                        console.warn(`[실패] ${fileMap[key]}`);
+                    }
+                }
+            }
+        }, 15000); // 15초 이상 로딩되면 에러 메시지 표시
+
+        const players = new Tone.Players(fileMap, () => {
+            clearTimeout(loadingTimeout); // ✅ 로딩 성공 시 타임아웃 제거
+            console.log('All audio files loaded.');
+            document.getElementById('loading-overlay').style.display = 'none';
+        }).toDestination();
+        
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex > 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        const sampleContainer = document.getElementById('sample-container');
+        samples.forEach(sample => {
+            const sampleCard = document.createElement('div');
+            sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg';
+            
+            let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between"><h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3><div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-4 gap-3">`;
+
+            const modelNames = ['모델 1', '모델 2', '모델 3'];
+            const shuffledModels = shuffle([...modelNames]);
+            
+            const allModels = [{displayName: '원본', modelName: '원본'}, ...shuffledModels.map((model, i) => ({
+                displayName: `Sample ${String.fromCharCode(65 + i)}`,
+                modelName: model
+            }))];
+
+            allModels.forEach(({displayName, modelName}) => {
+                const isOriginal = displayName === '원본';
+                const buttonColor = isOriginal ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+                
+                innerHTML += `<button data-sample-id="${sample.id}" data-model-name="${modelName}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>${displayName}</span>
+                              </button>`;
+            });
+
+            innerHTML += `</div></div>`;
+            sampleCard.innerHTML = innerHTML;
+            sampleContainer.appendChild(sampleCard);
+        });
+
+        sampleContainer.addEventListener('click', async (e) => {
+            const button = e.target.closest('.play-button');
+            if (!button) return;
+            if (!isToneStarted) { await Tone.start(); isToneStarted = true; }
+            
+            const { sampleId, modelName } = button.dataset;
+            
+            if (currentlyPlaying && currentlyPlaying.button !== button) {
+                const oldPlayer = players.player(`${currentlyPlaying.sampleId}-${currentlyPlaying.modelName}`);
+                oldPlayer.stop();
+                resetButton(currentlyPlaying.button);
+            }
+
+            const player = players.player(`${sampleId}-${modelName}`);
+            if (button.classList.contains('playing')) {
+                player.stop();
+                resetButton(button);
+                currentlyPlaying = null;
+            } else {
+                playAudio(button, sampleId, modelName);
+            }
+        });
+
+        function playAudio(button, sampleId, modelName) {
+            const playerKey = `${sampleId}-${modelName}`;
+            const player = players.player(playerKey);
+
+            if (!player || !player.loaded) {
+                console.error('파일을 찾을 수 없습니다:', fileMap[playerKey]);
+                button.classList.add('!bg-red-500', 'hover:!bg-red-600'); // ✅ 에러 시 버튼 색상 변경
+                setTimeout(() => button.classList.remove('!bg-red-500', 'hover:!bg-red-600'), 1500);
+                return;
+            }
+
+            button.classList.add('playing');
+            button.innerHTML = `<svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span>재생 중...</span>`;
+            
+            player.start();
+            currentlyPlaying = { button, sampleId, modelName };
+
+            const audioDuration = player.buffer.duration;
+            setTimeout(() => {
+                if (currentlyPlaying && currentlyPlaying.button === button) {
+                    resetButton(button);
+                    currentlyPlaying = null;
+                }
+            }, audioDuration * 1000 + 100); 
+        }
+
+        function resetButton(button) {
+            const displayName = button.dataset.displayName;
+            button.classList.remove('playing');
+            button.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${displayName}</span>`;
+        }
+    </script>
+</body>
+</html>
+```
+
+<!-- ### 문제 해결 방법
+
+1.  **개발자 도구 열기**: 웹 페이지에서 키보드 `F12` 키를 누르거나, 마우스 오른쪽 버튼을 클릭하여 '검사(Inspect)'를 선택하세요.
+2.  **'콘솔(Console)' 탭 확인**:
+    * 만약 15초가 지나도 로딩이 끝나지 않으면, 콘솔 창에 **"[실패] audio/sample_.../model_x.wav"** 와 같은 경고 메시지가 나타납니다. 여기에 표시된 파일 경로가 잘못된 것입니다.
+    * 빨간색으로 표시되는 다른 에러 메시지가 있는지도 확인해보세요.
+3.  **'네트워크(Network)' 탭 확인**:
+    * 개발자 도구의 '네트워크(Network)' 탭을 클릭하세요.
+    * 페이지를 새로고침(`F5` 키)하면, 페이지가 로드하는 모든 파일 목록이 나타납니다.
+    * 목록에서 `Status`가 **404**로 표시된 파일이 있는지 찾아보세요. 404 에러는 해당 경로에 파일이 없다는 가장 확실한 증거입니다.
+
+### 흔히 발생하는 실수 (체크리스트)
+
+* **경로 오타**: 폴더 이름(`audio`, `sample_01` 등)이나 파일 이름(`original.wav` 등)에 오타가 있는지 확인하세요.
+* **파일 구조**: 현재 HTML 파일과 `audio` 폴더가 같은 위치에 있는지 확인하세요.
+* **파일 존재 여부**: 해당 경로에 오디오 파일이 실제로 존재하는지 파일 탐색기에서 직접 확인하세요.
+
+위 방법으로 문제가 되는 파일 경로를 찾아서 수정한 후 다시 시도해보시면 정상적으로 작동할 것입 -->
