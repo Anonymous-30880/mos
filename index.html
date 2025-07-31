@@ -158,10 +158,10 @@
         function buildUI() {
             samples.forEach(sample => {
                 if (sample.id === 1) {
-                    sampleContainer.appendChild(createTitle('음정 정확도 (Pitch Correction)'));
+                    sampleContainer.appendChild(createTitle('음정 교정 정확도'));
                     sampleContainer.appendChild(createReferenceSection());
                 } else if (sample.id === 5) {
-                    sampleContainer.appendChild(createTitle('표현 보존 (Expression Preservation)'));
+                    sampleContainer.appendChild(createTitle('음정 교정 시 표현 보존 성능'));
                 }
 
                 const sampleCard = document.createElement('div');
@@ -183,12 +183,12 @@
                     allModels = [ {displayName: '기준 MIDI', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
                 } else {
                     const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4'];
-                    allModels = [ {displayName: '원본', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
+                    allModels = [ {displayName: '원본(음정오류포함)', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
                 }
 
                 allModels.forEach(({displayName, modelName}) => {
                     const playerKey = `${sample.id}-${modelName}`;
-                    const isReference = displayName === '원본' || displayName === '기준 MIDI';
+                    const isReference = displayName === '원본(음정오류포함)' || displayName === '기준 MIDI';
                     const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
                     
                     innerHTML += `<div class="flex flex-col items-center">
