@@ -11,22 +11,55 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        .play-button.playing {
-            background-color: #F59E0B; /* Amber 500 */
-        }
         #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            gap: 1rem;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; flex-direction: column; gap: 1rem;
+        }
+        /* --- 탐색바 스타일 --- */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            cursor: pointer;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        /* Chrome, Safari, Opera, Edge */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb; /* gray-200 */
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px; /* (thumb-height - track-height) / 2 */
+            width: 16px;
+            height: 16px;
+            background: #3b82f6; /* blue-600 */
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+        /* Firefox */
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -41,32 +74,62 @@
     </div>
 
     <div class="container mx-auto px-4 py-8 md:py-12">
-        <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS (Mean Opinion Score) Text</h1>
-            <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 듣고 아래의 구글폼의 설명을 따라 평가해주세요</p>
-            <div class="mt-4 text-left max-w-2xl mx-auto bg-blue-50 p-4 rounded-lg">
+        <!-- ✅✅✅ 헤더 영역을 요청하신 내용으로 전체 수정했습니다. ✅✅✅ -->
+        <header class="text-left max-w-3xl mx-auto mb-8 md:mb-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">🎧 설문에 참여해주셔서 감사합니다!</h2>
+            <p class="text-gray-700 mb-6">이 설문은 노래 음정을 자동으로 고치는 기술의 성능을 사람의 귀로 직접 평가하기 위한 것입니다. 여러분의 응답은 연구에 큰 도움이 됩니다.</p>
+
+            <div class="bg-red-50 border border-red-200 p-5 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">⚠️ 설문 전 준비 사항</h3>
                 <ul class="list-disc pl-5 text-gray-700 space-y-2">
-                    <li><strong>이어폰 필수 착용</strong>하여 평가해주세요.</li>
-                    <li>한 샘플당 <strong>최소 4~5번 이상 자세히 듣고</strong> 평가해주세요.</li>
-                    <li>각 문제의 <strong>가이드를 꼭 숙지</strong>하고 점수를 평가해주세요.</li>
-                    <li>점수는 <strong>1 ~ 5 점</strong>으로 평가 가능하며, 점수 기준을 숙지하고 평가해주세요.</li>
+                    <li>조용한 환경에서 참여해주세요.</li>
+                    <li>이어폰이나 헤드폰을 꼭 착용한 뒤 평가해 주세요.</li>
+                    <li>각 음성은 4~5번 이상 반복해서 들어본 후 점수를 매겨주세요.</li>
+                    <li>점수는 1점(매우 나쁨) ~ 5점(매우 좋음) 중 하나를 선택합니다.</li>
+                    <li>점수를 줄 때는 제공된 설명 기준을 꼭 읽고 따라주세요.</li>
                 </ul>
             </div>
-            <p class="mt-4 text-center">
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLScyl6vF9NU-5DhV5rSF8bKW27SdSO-yyYFDnvrw3FhFsmN2EA/viewform?usp=header" target="_blank" class="text-blue-600 hover:underline">
-                    구글폼 링크
-                </a>
-            </p>
+
+            <div class="bg-blue-50 border border-blue-200 p-5 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">📝 설문 참여 방법</h3>
+                <ol class="list-decimal pl-5 text-gray-700 space-y-3">
+                    <li>
+                        아래 버튼을 눌러 구글 설문지에 접속합니다.
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScyl6vF9NU-5DhV5rSF8bKW27SdSO-yyYFDnvrw3FhFsmN2EA/viewform?usp=header" target="_blank" class="inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors mt-2">
+                            👉 설문지 바로가기
+                        </a>
+                    </li>
+                    <li>설문지 상단에 있는 설명글을 꼭 읽어주세요.</li>
+                    <li>
+                        이 페이지에 있는 음성 샘플들을 위에서 아래로 차례대로 들어주세요.
+                        <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
+                            <li>각 항목은 다른 노래입니다.</li>
+                            <li>각 샘플(A, B, C 등)은 서로 다른 방식으로 음정을 고친 결과입니다.</li>
+                            <li>표시된 Sample A~E는 시스템 이름과 관계 없습니다. 순서는 무작위입니다.</li>
+                        </ul>
+                    </li>
+                    <li>모든 샘플을 들은 뒤, 설문지에서 점수를 선택해 제출해 주세요.</li>
+                </ol>
+            </div>
+
+            <div class="bg-green-50 border border-green-200 p-5 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">🎯 평가 항목은 다음 두 가지입니다:</h3>
+                <ul class="list-disc pl-5 text-gray-700 space-y-1">
+                    <li><strong>음정 정확도</strong> – 노래가 반주와 잘 어울리는지</li>
+                    <li><strong>표현 보존도</strong> – 비브라토나 감정 등을 훼손하지 않았는지</li>
+                </ul>
+            </div>
         </header>
 
-        <div id="sample-container" class="space-y-6">
+        <div id="sample-container" class="space-y-8">
             <!-- 샘플 데이터가 여기에 동적으로 추가됩니다. -->
         </div>
     </div>
 
     <script>
-        let currentlyPlaying = null; 
+        let currentlyPlaying = null; // { player, playerKey, button, seekBar, timeDisplay, updateInterval }
         let isToneStarted = false;
+        let isSeeking = false;
 
         const pitchCorrectionReferences = [
             { score: 1, file: 'audio/references/pa_1.wav' },
@@ -75,13 +138,10 @@
         ];
 
         const samples = [
-            // --- Pitch Correction ---
             { id: 1, name: '평가 항목 01', files: { '원본': 'audio/pitch_acc/eval1/midi.wav', '모델 1': 'audio/pitch_acc/eval1/brt_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval1/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval1/diff_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval1/melo_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval1/org_midi_wav.wav' } },
             { id: 2, name: '평가 항목 02', files: { '원본': 'audio/pitch_acc/eval2/midi.wav', '모델 1': 'audio/pitch_acc/eval2/auto_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval2/diff_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval2/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval2/org_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval2/melo_midi_wav.wav' } },
             { id: 3, name: '평가 항목 03', files: { '원본': 'audio/pitch_acc/eval3/midi.wav', '모델 1': 'audio/pitch_acc/eval3/org_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval3/brt_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval3/melo_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval3/auto_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval3/diff_midi_wav.wav'} },
             { id: 4, name: '평가 항목 04', files: { '원본': 'audio/pitch_acc/eval4/midi.wav', '모델 1': 'audio/pitch_acc/eval4/melo_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval4/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval4/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval4/diff_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval4/org_midi_wav.wav'} },
-
-            // --- Expression Preservation ---
             { id: 5, name: '평가 항목 05', files: { '원본': 'audio/expression_preserv/eval5/org_wav.wav', '모델 1': 'audio/expression_preserv/eval5/diff_wav.wav', '모델 2': 'audio/expression_preserv/eval5/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval5/melo_wav.wav', '모델 4': 'audio/expression_preserv/eval5/auto_wav.wav' } },
             { id: 6, name: '평가 항목 06', files: { '원본': 'audio/expression_preserv/eval6/org_wav.wav', '모델 1': 'audio/expression_preserv/eval6/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval6/melo_wav.wav', '모델 3': 'audio/expression_preserv/eval6/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval6/auto_wav.wav' } },
             { id: 7, name: '평가 항목 07', files: { '원본': 'audio/expression_preserv/eval7/org_wav.wav', '모델 1': 'audio/expression_preserv/eval7/melo_wav.wav', '모델 2': 'audio/expression_preserv/eval7/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval7/auto_wav.wav', '모델 4': 'audio/expression_preserv/eval7/diff_wav.wav' } },
@@ -89,16 +149,10 @@
         ];
 
         const fileMap = {};
-        pitchCorrectionReferences.forEach(ref => {
-            const key = `ref-pa-${ref.score}`;
-            fileMap[key] = ref.file;
-        });
+        pitchCorrectionReferences.forEach(ref => fileMap[`ref-pa-${ref.score}`] = ref.file);
         samples.forEach(sample => {
             for (const modelName in sample.files) {
-                if(sample.files[modelName]) {
-                    const key = `${sample.id}-${modelName}`;
-                    fileMap[key] = sample.files[modelName];
-                }
+                if(sample.files[modelName]) fileMap[`${sample.id}-${modelName}`] = sample.files[modelName];
             }
         });
         
@@ -119,13 +173,20 @@
         }, 15000); 
 
         const players = new Tone.Players(fileMap, () => {
-            clearTimeout(loadingTimeout); 
-            console.log('All audio files loaded.');
+            clearTimeout(loadingTimeout);
             document.getElementById('loading-overlay').style.display = 'none';
+            document.querySelectorAll('.player-container').forEach(container => {
+                const playerKey = container.dataset.playerKey;
+                const player = players.player(playerKey);
+                if (player.loaded) {
+                    const timeDisplay = container.querySelector('.time-display');
+                    timeDisplay.textContent = `0:00 / ${formatTime(player.buffer.duration)}`;
+                }
+            });
         }).toDestination();
         
         const sampleContainer = document.getElementById('sample-container');
-        
+
         function createTitle(text) {
             const titleElement = document.createElement('h2');
             titleElement.className = 'text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b-2 border-gray-200';
@@ -133,23 +194,32 @@
             return titleElement;
         }
 
+        function createPlayerUI(playerKey, displayName, colorClass) {
+            return `
+                <div class="player-container flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50" data-player-key="${playerKey}">
+                    <button class="play-button flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full ${colorClass} text-white transition-transform transform hover:scale-110">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8.006v3.988a1 1 0 001.555.838l3.497-1.994a1 1 0 000-1.676l-3.497-1.994z" clip-rule="evenodd"></path></svg>
+                    </button>
+                    <div class="flex-grow flex items-center gap-3">
+                        <span class="font-medium text-sm w-28 text-left truncate">${displayName}</span>
+                        <div class="w-full">
+                            <input type="range" class="seek-bar w-full" value="0" step="1" max="1000">
+                        </div>
+                        <span class="time-display text-xs text-gray-500 font-mono w-20 text-right">0:00 / 0:00</span>
+                    </div>
+                </div>
+            `;
+        }
+        
         function createReferenceSection() {
             const section = document.createElement('div');
             section.className = 'bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6';
-            
-            let innerHTML = `<h4 class="text-lg font-semibold text-gray-800 mb-3">음정 정확도 점수 기준 샘플</h4>
+            let innerHTML = `<h4 class="text-lg font-semibold text-gray-800 mb-2">음정 정확도 점수 기준 샘플</h4>
                              <p class="text-sm text-gray-600 mb-4">평가를 시작하기 전, 아래 샘플을 통해 각 점수가 의미하는 음질 수준을 확인해주세요.</p>
-                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">`;
-
+                             <div class="space-y-2">`;
             pitchCorrectionReferences.forEach(ref => {
-                const displayName = `${ref.score}점 기준`;
-                const playerKey = `ref-pa-${ref.score}`;
-                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400 text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-sm">${displayName}</span>
-                              </button>`;
+                innerHTML += createPlayerUI(`ref-pa-${ref.score}`, `${ref.score}점 기준`, 'bg-yellow-500');
             });
-
             innerHTML += `</div>`;
             section.innerHTML = innerHTML;
             return section;
@@ -164,10 +234,9 @@
             }
 
             const sampleCard = document.createElement('div');
-            sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg';
+            sampleCard.className = 'bg-white p-4 rounded-xl shadow-md';
+            let innerHTML = `<h3 class="text-xl font-semibold text-gray-800 mb-3">${sample.name}</h3><div class="space-y-2">`;
             
-            let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between"><h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3><div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">`;
-
             let allModels;
             if (sample.id <= 4) {
                 const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4', '모델 5'];
@@ -179,73 +248,131 @@
 
             allModels.forEach(({displayName, modelName}) => {
                 const isReference = displayName === '원본' || displayName === '기준 MIDI';
-                const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
-                const playerKey = `${sample.id}-${modelName}`;
-                
-                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-xs sm:text-sm truncate">${displayName}</span>
-                              </button>`;
+                const colorClass = isReference ? 'bg-green-600' : 'bg-blue-600';
+                innerHTML += createPlayerUI(`${sample.id}-${modelName}`, displayName, colorClass);
             });
 
-            innerHTML += `</div></div>`;
+            innerHTML += `</div>`;
             sampleCard.innerHTML = innerHTML;
             sampleContainer.appendChild(sampleCard);
         });
 
-        sampleContainer.addEventListener('click', async (e) => {
+        sampleContainer.addEventListener('click', async e => {
             const button = e.target.closest('.play-button');
             if (!button) return;
-            if (!isToneStarted) { await Tone.start(); isToneStarted = true; }
-            
-            const { playerKey } = button.dataset;
-            
-            if (currentlyPlaying && currentlyPlaying.button !== button) {
-                const oldPlayer = players.player(currentlyPlaying.playerKey);
-                oldPlayer.stop();
-                resetButton(currentlyPlaying.button);
-            }
 
-            const player = players.player(playerKey);
-            if (button.classList.contains('playing')) {
-                player.stop();
-                resetButton(button);
-                currentlyPlaying = null;
+            if (!isToneStarted) {
+                await Tone.start();
+                isToneStarted = true;
+            }
+            
+            const container = button.closest('.player-container');
+            const playerKey = container.dataset.playerKey;
+            
+            if (currentlyPlaying && currentlyPlaying.playerKey === playerKey) {
+                stopAudio();
             } else {
-                playAudio(button, playerKey);
+                if (currentlyPlaying) stopAudio();
+                playAudio(playerKey);
             }
         });
 
-        function playAudio(button, playerKey) {
+        sampleContainer.addEventListener('input', e => {
+            const seekBar = e.target.closest('.seek-bar');
+            if (!seekBar) return;
+
+            const container = seekBar.closest('.player-container');
+            const playerKey = container.dataset.playerKey;
             const player = players.player(playerKey);
 
-            if (!player || !player.loaded) {
-                console.error('파일을 찾을 수 없습니다:', fileMap[playerKey]);
-                button.classList.add('!bg-red-500', 'hover:!bg-red-600');
-                setTimeout(() => button.classList.remove('!bg-red-500', 'hover:!bg-red-600'), 1500);
-                return;
+            if (player && player.loaded) {
+                const newTime = player.buffer.duration * (seekBar.value / 1000);
+                if (currentlyPlaying && currentlyPlaying.playerKey === playerKey) {
+                     player.seek(newTime);
+                }
+                const timeDisplay = container.querySelector('.time-display');
+                timeDisplay.textContent = `${formatTime(newTime)} / ${formatTime(player.buffer.duration)}`;
+            }
+        });
+        
+        sampleContainer.addEventListener('mousedown', e => {
+             if (e.target.closest('.seek-bar')) isSeeking = true;
+        });
+
+        window.addEventListener('mouseup', e => {
+            if(isSeeking) {
+                isSeeking = false;
+            }
+        });
+
+        function playAudio(playerKey) {
+            const player = players.player(playerKey);
+            if (!player || !player.loaded) return;
+
+            const container = document.querySelector(`.player-container[data-player-key="${playerKey}"]`);
+            const button = container.querySelector('.play-button');
+            const seekBar = container.querySelector('.seek-bar');
+            const timeDisplay = container.querySelector('.time-display');
+            
+            const offset = player.buffer.duration * (seekBar.value / 1000);
+            player.start(undefined, offset);
+            setButtonToPause(button);
+
+            const updateInterval = setInterval(() => {
+                if (player.state === 'stopped') {
+                    stopAudio();
+                    return;
+                }
+                if (!isSeeking) {
+                    let currentTime = player.toSeconds() - player.context.now() + player.startTime;
+                    currentTime = Math.max(0, currentTime);
+                    const progress = currentTime / player.buffer.duration;
+                    seekBar.value = progress * 1000;
+                    timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(player.buffer.duration)}`;
+                }
+            }, 50);
+
+            player.onstop = () => {
+                 if (currentlyPlaying && currentlyPlaying.playerKey === playerKey) {
+                    stopAudio();
+                }
+            };
+
+            currentlyPlaying = { player, playerKey, button, seekBar, timeDisplay, updateInterval };
+        }
+
+        function stopAudio() {
+            if (!currentlyPlaying) return;
+            const { player, button, seekBar, timeDisplay, updateInterval, playerKey } = currentlyPlaying;
+            
+            player.stop();
+            player.onstop = null;
+            clearInterval(updateInterval);
+            
+            setButtonToPlay(button);
+            
+            if(!isSeeking){
+              seekBar.value = 0;
+              timeDisplay.textContent = `0:00 / ${formatTime(player.buffer.duration)}`;
             }
 
-            button.classList.add('playing');
-            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span class="text-xs sm:text-sm truncate">재생 중...</span>`;
-            
-            player.start();
-            currentlyPlaying = { button, playerKey };
-
-            const audioDuration = player.buffer.duration;
-            setTimeout(() => {
-                if (currentlyPlaying && currentlyPlaying.button === button) {
-                    resetButton(button);
-                    currentlyPlaying = null;
-                }
-            }, audioDuration * 1000 + 100); 
+            currentlyPlaying = null;
         }
 
-        function resetButton(button) {
-            const displayName = button.dataset.displayName;
-            button.classList.remove('playing');
-            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-xs sm:text-sm truncate">${displayName}</span>`;
+        function setButtonToPlay(button) {
+            button.innerHTML = `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8.006v3.988a1 1 0 001.555.838l3.497-1.994a1 1 0 000-1.676l-3.497-1.994z" clip-rule="evenodd"></path></svg>`;
         }
+
+        function setButtonToPause(button) {
+            button.innerHTML = `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h1a1 1 0 001-1V8a1 1 0 00-1-1H8zm4 0a1 1 0 00-1 1v4a1 1 0 001 1h1a1 1 0 001-1V8a1 1 0 00-1-1h-1z" clip-rule="evenodd"></path></svg>`;
+        }
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec.toString().padStart(2, '0')}`;
+        }
+
     </script>
 </body>
 </html>
