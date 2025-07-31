@@ -13,11 +13,34 @@
         }
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999; flex-direction: column; gap: 1rem;
         }
         .play-button.playing {
+            background-color: #F59E0B; /* Amber 500 */
+        }
+        .play-button.playing .play-icon {
+            display: none;
+        }
+        .play-button:not(.playing) .pause-icon {
+            display: none;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 9999px;
+            height: 0.5rem;
+            margin-top: 0.75rem;
+            cursor: pointer;
+        }
+        .progress-bar {
+            background-color: #3B82F6; /* blue-600 */
+            height: 0.5rem;
+            border-radius: 9999px;
+            width: 0%;
+        }
+        .play-button.playing + .progress-bar-container .progress-bar {
             background-color: #F59E0B; /* Amber 500 */
         }
     </style>
@@ -33,7 +56,7 @@
     </div>
 
     <div class="container mx-auto px-4 py-8 md:py-12">
-        <header class="text-left max-w-3xl mx-auto mb-8 md:mb-12">
+        <header class="text-left max-w-4xl mx-auto mb-8 md:mb-12">
             <h2 class="text-2xl font-bold text-gray-900 mb-4">🎧 설문에 참여해주셔서 감사합니다!</h2>
             <p class="text-gray-700 mb-6">이 설문은 노래 음정을 자동으로 고치는 기술의 성능을 사람의 귀로 직접 평가하기 위한 것입니다. 여러분의 응답은 연구에 큰 도움이 됩니다.</p>
 
@@ -79,15 +102,17 @@
             </div>
         </header>
 
-        <div id="sample-container" class="space-y-8">
+        <main id="sample-container" class="max-w-4xl mx-auto space-y-8">
             <!-- 샘플 데이터가 여기에 동적으로 추가됩니다. -->
-        </div>
+        </main>
     </div>
 
     <script>
-        let currentlyPlaying = null; // { player, button }
+        // --- 글로벌 변수 및 상태 관리 ---
+        let currentlyPlaying = null; // { player, button, progressBar, playerKey, startTime, animationFrameId }
         let isToneStarted = false;
 
+        // --- 오디오 데이터 정의 ---
         const pitchCorrectionReferences = [
             { score: 1, file: 'audio/references/pa_1.wav' },
             { score: 3, file: 'audio/references/pa_3.wav' },
@@ -105,6 +130,7 @@
             { id: 8, name: '평가 항목 08', files: { '원본': 'audio/expression_preserv/eval8/org_wav.wav', '모델 1': 'audio/expression_preserv/eval8/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval8/auto_wav.wav', '모델 3': 'audio/expression_preserv/eval8/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval8/melo_wav.wav' } },
         ];
 
+        // --- 오디오 파일 로딩 ---
         const fileMap = {};
         pitchCorrectionReferences.forEach(ref => fileMap[`ref-pa-${ref.score}`] = ref.file);
         samples.forEach(sample => {
@@ -123,9 +149,58 @@
         const players = new Tone.Players(fileMap, () => {
             clearTimeout(loadingTimeout);
             document.getElementById('loading-overlay').style.display = 'none';
+            buildUI(); // UI 빌드를 로딩 완료 후 호출
         }).toDestination();
         
+        // --- UI 생성 함수 ---
         const sampleContainer = document.getElementById('sample-container');
+
+        function buildUI() {
+            samples.forEach(sample => {
+                if (sample.id === 1) {
+                    sampleContainer.appendChild(createTitle('음정 정확도 (Pitch Correction)'));
+                    sampleContainer.appendChild(createReferenceSection());
+                } else if (sample.id === 5) {
+                    sampleContainer.appendChild(createTitle('표현 보존 (Expression Preservation)'));
+                }
+
+                const sampleCard = document.createElement('div');
+                sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md';
+                
+                let innerHTML = `<h3 class="text-xl font-semibold text-gray-800 mb-6">${sample.name}</h3>
+                                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-6">`;
+
+                let allModels;
+                if (sample.id <= 4) {
+                    const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4', '모델 5'];
+                    allModels = [ {displayName: '기준 MIDI', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
+                } else {
+                    const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4'];
+                    allModels = [ {displayName: '원본', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
+                }
+
+                allModels.forEach(({displayName, modelName}) => {
+                    const playerKey = `${sample.id}-${modelName}`;
+                    const isReference = displayName === '원본' || displayName === '기준 MIDI';
+                    const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+                    
+                    innerHTML += `<div class="flex flex-col items-center">
+                                    <p class="font-medium text-sm mb-2 h-5 ${isReference ? 'text-green-700 font-semibold' : 'text-gray-700'}">${displayName}</p>
+                                    <button data-player-key="${playerKey}" class="play-button flex items-center justify-center w-12 h-12 rounded-full ${buttonColor} text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                        <svg class="play-icon w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+                                        <svg class="pause-icon w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 4.5a.75.75 0 00-.75.75v10.5a.75.75 0 001.5 0V5.25a.75.75 0 00-.75-.75zM14.25 4.5a.75.75 0 00-.75.75v10.5a.75.75 0 001.5 0V5.25a.75.75 0 00-.75-.75z"></path></svg>
+                                    </button>
+                                    <div data-player-key="${playerKey}" class="progress-bar-container">
+                                        <div id="progress-bar-${playerKey}" class="progress-bar"></div>
+                                    </div>
+                                  </div>`;
+                });
+
+                innerHTML += `</div>`;
+                sampleCard.innerHTML = innerHTML;
+                sampleContainer.appendChild(sampleCard);
+            });
+        }
 
         function createTitle(text) {
             const titleElement = document.createElement('h2');
@@ -139,110 +214,111 @@
             section.className = 'bg-yellow-50 border border-yellow-200 p-5 rounded-lg mb-6';
             let innerHTML = `<h4 class="text-lg font-semibold text-gray-800 mb-3">음정 정확도 점수 기준 샘플</h4>
                              <p class="text-sm text-gray-600 mb-4">평가를 시작하기 전, 아래 샘플을 통해 각 점수가 의미하는 음질 수준을 확인해주세요.</p>
-                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">`;
+                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">`;
             pitchCorrectionReferences.forEach(ref => {
                 const playerKey = `ref-pa-${ref.score}`;
                 const displayName = `${ref.score}점 기준`;
-                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400 text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-sm">${displayName}</span>
-                              </button>`;
+                innerHTML += `<div class="flex flex-col items-center">
+                                <p class="font-medium text-sm mb-2 h-5 text-yellow-800 font-semibold">${displayName}</p>
+                                <button data-player-key="${playerKey}" class="play-button flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                    <svg class="play-icon w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
+                                    <svg class="pause-icon w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 4.5a.75.75 0 00-.75.75v10.5a.75.75 0 001.5 0V5.25a.75.75 0 00-.75-.75zM14.25 4.5a.75.75 0 00-.75.75v10.5a.75.75 0 001.5 0V5.25a.75.75 0 00-.75-.75z"></path></svg>
+                                </button>
+                                <div data-player-key="${playerKey}" class="progress-bar-container">
+                                    <div id="progress-bar-${playerKey}" class="progress-bar bg-yellow-500"></div>
+                                </div>
+                              </div>`;
             });
             innerHTML += `</div>`;
             section.innerHTML = innerHTML;
             return section;
         }
 
-        samples.forEach(sample => {
-            if (sample.id === 1) {
-                sampleContainer.appendChild(createTitle('음정 정확도 (Pitch Correction)'));
-                sampleContainer.appendChild(createReferenceSection());
-            } else if (sample.id === 5) {
-                sampleContainer.appendChild(createTitle('표현 보존 (Expression Preservation)'));
+        // --- 오디오 제어 로직 ---
+        function stopCurrentlyPlaying() {
+            if (currentlyPlaying) {
+                currentlyPlaying.player.stop();
+                cancelAnimationFrame(currentlyPlaying.animationFrameId);
+                currentlyPlaying.button.classList.remove('playing');
+                currentlyPlaying.progressBar.style.width = '0%';
+                currentlyPlaying = null;
             }
+        }
 
-            const sampleCard = document.createElement('div');
-            sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md';
+        function updateProgress() {
+            if (!currentlyPlaying) return;
+
+            const elapsed = Tone.context.currentTime - currentlyPlaying.startTime;
+            const duration = currentlyPlaying.player.buffer.duration;
+            const progressPercent = Math.min((elapsed / duration) * 100, 100);
             
-            let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between">
-                               <h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3>
-                               <div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">`;
+            currentlyPlaying.progressBar.style.width = `${progressPercent}%`;
 
-            let allModels;
-            if (sample.id <= 4) {
-                const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4', '모델 5'];
-                allModels = [ {displayName: '기준 MIDI', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
+            if (elapsed >= duration) {
+                stopCurrentlyPlaying();
             } else {
-                const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4'];
-                allModels = [ {displayName: '원본', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
+                currentlyPlaying.animationFrameId = requestAnimationFrame(updateProgress);
             }
-
-            allModels.forEach(({displayName, modelName}) => {
-                const isReference = displayName === '원본' || displayName === '기준 MIDI';
-                const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
-                const playerKey = `${sample.id}-${modelName}`;
-                
-                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-xs sm:text-sm truncate">${displayName}</span>
-                              </button>`;
-            });
-
-            innerHTML += `</div></div>`;
-            sampleCard.innerHTML = innerHTML;
-            sampleContainer.appendChild(sampleCard);
-        });
-
-        function resetButtonUI(button) {
-            const displayName = button.dataset.displayName;
-            button.classList.remove('playing');
-            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                              <span class="text-xs sm:text-sm truncate">${displayName}</span>`;
         }
 
-        function setPlayingUI(button) {
-            button.classList.add('playing');
-            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                              <span class="text-xs sm:text-sm truncate">재생 중...</span>`;
-        }
-
-        sampleContainer.addEventListener('click', async e => {
-            const button = e.target.closest('.play-button');
-            if (!button) return;
-
+        async function playAudio(playerKey, offset = 0) {
             if (!isToneStarted) {
                 await Tone.start();
                 isToneStarted = true;
             }
 
-            const playerKey = button.dataset.playerKey;
             const player = players.player(playerKey);
+            if (!player) return;
 
-            // --- 오디오 제어 로직 ---
-            if (currentlyPlaying && currentlyPlaying.button === button) {
+            const button = document.querySelector(`.play-button[data-player-key="${playerKey}"]`);
+            const progressBar = document.getElementById(`progress-bar-${playerKey}`);
+            
+            stopCurrentlyPlaying();
+
+            player.start(undefined, offset);
+            
+            currentlyPlaying = {
+                player,
+                button,
+                progressBar,
+                playerKey,
+                startTime: Tone.context.currentTime - offset,
+                animationFrameId: null
+            };
+
+            button.classList.add('playing');
+            updateProgress();
+        }
+
+        // --- 이벤트 리스너 ---
+        sampleContainer.addEventListener('click', async e => {
+            const button = e.target.closest('.play-button');
+            const progressContainer = e.target.closest('.progress-bar-container');
+
+            // 재생/정지 버튼 클릭
+            if (button) {
+                const playerKey = button.dataset.playerKey;
                 // 현재 재생 중인 버튼을 다시 누르면 정지
-                player.stop();
-                resetButtonUI(button);
-                currentlyPlaying = null;
-            } else {
-                // 다른 오디오가 재생 중이면 정지
-                if (currentlyPlaying) {
-                    currentlyPlaying.player.stop();
-                    resetButtonUI(currentlyPlaying.button);
+                if (currentlyPlaying && currentlyPlaying.playerKey === playerKey) {
+                    stopCurrentlyPlaying();
+                } else { // 새 오디오 재생
+                    playAudio(playerKey);
                 }
-                
-                // 새 오디오 재생
-                player.start();
-                setPlayingUI(button);
-                currentlyPlaying = { player, button };
+                return;
+            }
 
-                // 재생이 끝나면 자동으로 버튼 UI 리셋
-                player.onstop = () => {
-                    if (currentlyPlaying && currentlyPlaying.button === button) {
-                        resetButtonUI(button);
-                        currentlyPlaying = null;
-                    }
-                }
+            // 프로그레스 바 클릭 (탐색)
+            if (progressContainer) {
+                const playerKey = progressContainer.dataset.playerKey;
+                const player = players.player(playerKey);
+                if (!player || !player.loaded) return;
+
+                const duration = player.buffer.duration;
+                const rect = progressContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const seekTime = (clickX / rect.width) * duration;
+                
+                playAudio(playerKey, seekTime);
             }
         });
     </script>
