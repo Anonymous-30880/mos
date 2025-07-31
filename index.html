@@ -42,8 +42,21 @@
 
     <div class="container mx-auto px-4 py-8 md:py-12">
         <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">음성 샘플 데모</h1>
-            <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 들어보세요.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS Test</h1>
+            <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 듣고 아래의 구글폼의 설명을 따라 평가해주세요</p>
+            <div class="mt-4 text-left max-w-2xl mx-auto bg-blue-50 p-4 rounded-lg">
+                <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                    <li><strong>이어폰 필수 착용</strong>하여 평가해주세요.</li>
+                    <li>한 샘플당 <strong>최소 4~5번 이상 자세히 듣고</strong> 평가해주세요.</li>
+                    <li>각 문제의 <strong>가이드를 꼭 숙지</strong>하고 점수를 평가해주세요.</li>
+                    <li>점수는 <strong>1 ~ 5 점</strong>으로 평가 가능하며, 점수 기준을 숙지하고 평가해주세요.</li>
+                </ul>
+            </div>
+            <p class="mt-4 text-center">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScyl6vF9NU-5DhV5rSF8bKW27SdSO-yyYFDnvrw3FhFsmN2EA/viewform?usp=header" target="_blank" class="text-blue-600 hover:underline">
+                    구글폼 링크
+                </a>
+            </p>
         </header>
 
         <div id="sample-container" class="space-y-6">
@@ -57,40 +70,48 @@
         let currentlyPlaying = null; 
         let isToneStarted = false;
 
-        // ✅ 중요: 여기에 각 샘플의 정보를 수동으로 입력하세요.
         const samples = [
+            // --- 평가 항목 1-10: 기준 MIDI(원본) 있음, 모델 1-5 ---
             {
-                id: 1,
-                name: '샘플 01',
-                files: {
-                    '원본':   'audio/sample01/mos_erroneous_wav.wav',
-                    '모델 1': 'audio/sample01/mos_corrected_wav_with_midi.wav',
-                    '모델 2': 'audio/sample01/mos_melodyne_wav_with_midi_mono.wav',
-                    '모델 3': 'audio/sample01/mos_autotune_wav_with_midi_mono.wav',
+                id: 1, name: '평가 항목 01', files: {
+                    '원본': 'audio/pitch_acc/eval1/midi.wav', '모델 1': 'audio/pitch_acc/eval1/brt_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval1/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval1/diff_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval1/melo_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval1/org_midi_wav.wav',
                 }
             },
             {
-                id: 2,
-                name: '샘플 02',
-                files: {
-                    '원본':   'audio/sample02/mos_erroneous_wav.wav',
-                    '모델 1': 'audio/sample02/mos_corrected_wav_with_midi.wav',
-                    '모델 2': 'audio/sample02/mos_melodyne_wav_with_midi_mono.wav',
-                    '모델 3': 'audio/sample02/mos_autotune_wav_with_midi_mono.wav',
+                id: 2, name: '평가 항목 02', files: {
+                    '원본': 'audio/pitch_acc/eval2/midi.wav', '모델 1': 'audio/pitch_acc/eval2/auto_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval2/diff_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval2/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval2/org_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval2/melo_midi_wav.wav',
                 }
             },
-            // ... 추가 샘플 ...
+            // ... 평가 항목 3부터 10까지 여기에 추가 ...
+            { id: 3, name: '평가 항목 03', files: { '원본': 'audio/pitch_acc/eval3/midi.wav', '모델 1': 'audio/pitch_acc/eval3/org_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval3/brt_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval3/melo_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval3/auto_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval3/diff_midi_wav.wav',} },
+            { id: 4, name: '평가 항목 04', files: { '원본': 'audio/pitch_acc/eval4/midi.wav', '모델 1': 'audio/pitch_acc/eval4/melo_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval4/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval4/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval4/diff_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval4/org_midi_wav.wav',} },
+
+            // --- 평가 항목 11-20: 원본 있음, 모델 1-4 ---
+            {
+                id: 5, name: '평가 항목 05', files: {
+                    '원본': 'audio/expression_preserv/eval5/org_wav.wav', '모델 1': 'audio/expression_preserv/eval5/diff_wav.wav', '모델 2': 'audio/expression_preserv/eval5/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval5/melo_wav.wav', '모델 4': 'audio/expression_preserv/eval5/auto_wav.wav',
+                }
+            },
+            {
+                id: 6, name: '평가 항목 06', files: {
+                    '원본': 'audio/expression_preserv/eval6/org_wav.wav', '모델 1': 'audio/expression_preserv/eval6/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval6/melo_wav.wav', '모델 3': 'audio/expression_preserv/eval6/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval6/auto_wav.wav',
+                }
+            },
+            // ... 평가 항목 13부터 20까지 여기에 추가 ...
+            { id: 7, name: '평가 항목 07', files: { '원본': 'audio/expression_preserv/eval7/org_wav.wav', '모델 1': 'audio/expression_preserv/eval7/melo_wav.wav', '모델 2': 'audio/expression_preserv/eval7/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval7/auto_wav.wav', '모델 4': 'audio/expression_preserv/eval7/diff_wav.wav', } },
+            { id: 8, name: '평가 항목 08', files: { '원본': 'audio/expression_preserv/eval8/org_wav.wav', '모델 1': 'audio/expression_preserv/eval8/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval8/auto_wav.wav', '모델 3': 'audio/expression_preserv/eval8/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval8/melo_wav.wav', } },
         ];
 
         const fileMap = {};
         samples.forEach(sample => {
             for (const modelName in sample.files) {
-                const key = `${sample.id}-${modelName}`;
-                fileMap[key] = sample.files[modelName];
+                if(sample.files[modelName]) {
+                    const key = `${sample.id}-${modelName}`;
+                    fileMap[key] = sample.files[modelName];
+                }
             }
         });
         
-        // ✅ 디버깅 기능 추가: 로딩 타임아웃 설정
         const loadingTimeout = setTimeout(() => {
             const loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay.style.display !== 'none') {
@@ -105,46 +126,51 @@
                     }
                 }
             }
-        }, 15000); // 15초 이상 로딩되면 에러 메시지 표시
+        }, 15000); 
 
         const players = new Tone.Players(fileMap, () => {
-            clearTimeout(loadingTimeout); // ✅ 로딩 성공 시 타임아웃 제거
+            clearTimeout(loadingTimeout); 
             console.log('All audio files loaded.');
             document.getElementById('loading-overlay').style.display = 'none';
         }).toDestination();
         
-        function shuffle(array) {
-            let currentIndex = array.length,  randomIndex;
-            while (currentIndex > 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
         const sampleContainer = document.getElementById('sample-container');
         samples.forEach(sample => {
             const sampleCard = document.createElement('div');
             sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg';
             
-            let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between"><h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3><div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-4 gap-3">`;
+            let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between"><h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3><div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">`;
 
-            const modelNames = ['모델 1', '모델 2', '모델 3'];
-            const shuffledModels = shuffle([...modelNames]);
-            
-            const allModels = [{displayName: '원본', modelName: '원본'}, ...shuffledModels.map((model, i) => ({
-                displayName: `Sample ${String.fromCharCode(65 + i)}`,
-                modelName: model
-            }))];
+            let allModels;
+
+            if (sample.id <= 4) {
+                const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4', '모델 5'];
+                allModels = [
+                    {displayName: '기준 MIDI', modelName: '원본'}, 
+                    ...modelNames.map((model, i) => ({
+                        displayName: `Sample ${String.fromCharCode(65 + i)}`,
+                        modelName: model
+                    }))
+                ];
+            } else {
+                const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4'];
+                allModels = [
+                    {displayName: '원본', modelName: '원본'}, 
+                    ...modelNames.map((model, i) => ({
+                        displayName: `Sample ${String.fromCharCode(65 + i)}`,
+                        modelName: model
+                    }))
+                ];
+            }
 
             allModels.forEach(({displayName, modelName}) => {
-                const isOriginal = displayName === '원본';
-                const buttonColor = isOriginal ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+                const isReference = displayName === '원본' || displayName === '기준 MIDI';
+                const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
                 
-                innerHTML += `<button data-sample-id="${sample.id}" data-model-name="${modelName}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span>${displayName}</span>
+                // ✅ 버튼 UI 수정: 아이콘/글씨 크기 반응형으로 변경, 중앙 정렬 강화
+                innerHTML += `<button data-sample-id="${sample.id}" data-model-name="${modelName}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-xs sm:text-sm truncate">${displayName}</span>
                               </button>`;
             });
 
@@ -182,13 +208,14 @@
 
             if (!player || !player.loaded) {
                 console.error('파일을 찾을 수 없습니다:', fileMap[playerKey]);
-                button.classList.add('!bg-red-500', 'hover:!bg-red-600'); // ✅ 에러 시 버튼 색상 변경
+                button.classList.add('!bg-red-500', 'hover:!bg-red-600');
                 setTimeout(() => button.classList.remove('!bg-red-500', 'hover:!bg-red-600'), 1500);
                 return;
             }
 
             button.classList.add('playing');
-            button.innerHTML = `<svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span>재생 중...</span>`;
+            // ✅ 재생 중 아이콘/글씨 크기도 동일하게 수정
+            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span class="text-xs sm:text-sm truncate">재생 중...</span>`;
             
             player.start();
             currentlyPlaying = { button, sampleId, modelName };
@@ -205,28 +232,9 @@
         function resetButton(button) {
             const displayName = button.dataset.displayName;
             button.classList.remove('playing');
-            button.innerHTML = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${displayName}</span>`;
+            // ✅ 원래 버튼 UI도 동일하게 수정
+            button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-xs sm:text-sm truncate">${displayName}</span>`;
         }
     </script>
 </body>
 </html>
-```
-
-<!-- ### 문제 해결 방법
-
-1.  **개발자 도구 열기**: 웹 페이지에서 키보드 `F12` 키를 누르거나, 마우스 오른쪽 버튼을 클릭하여 '검사(Inspect)'를 선택하세요.
-2.  **'콘솔(Console)' 탭 확인**:
-    * 만약 15초가 지나도 로딩이 끝나지 않으면, 콘솔 창에 **"[실패] audio/sample_.../model_x.wav"** 와 같은 경고 메시지가 나타납니다. 여기에 표시된 파일 경로가 잘못된 것입니다.
-    * 빨간색으로 표시되는 다른 에러 메시지가 있는지도 확인해보세요.
-3.  **'네트워크(Network)' 탭 확인**:
-    * 개발자 도구의 '네트워크(Network)' 탭을 클릭하세요.
-    * 페이지를 새로고침(`F5` 키)하면, 페이지가 로드하는 모든 파일 목록이 나타납니다.
-    * 목록에서 `Status`가 **404**로 표시된 파일이 있는지 찾아보세요. 404 에러는 해당 경로에 파일이 없다는 가장 확실한 증거입니다.
-
-### 흔히 발생하는 실수 (체크리스트)
-
-* **경로 오타**: 폴더 이름(`audio`, `sample_01` 등)이나 파일 이름(`original.wav` 등)에 오타가 있는지 확인하세요.
-* **파일 구조**: 현재 HTML 파일과 `audio` 폴더가 같은 위치에 있는지 확인하세요.
-* **파일 존재 여부**: 해당 경로에 오디오 파일이 실제로 존재하는지 파일 탐색기에서 직접 확인하세요.
-
-위 방법으로 문제가 되는 파일 경로를 찾아서 수정한 후 다시 시도해보시면 정상적으로 작동할 것입 -->
