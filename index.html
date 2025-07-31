@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>음성 샘플 데모</title>
+    <title>음성 샘플 평가 페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
 
     <div class="container mx-auto px-4 py-8 md:py-12">
         <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS Test</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS (Mean Opinion Score) Test</h1>
             <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 듣고 아래의 구글폼의 설명을 따라 평가해주세요</p>
             <div class="mt-4 text-left max-w-2xl mx-auto bg-blue-50 p-4 rounded-lg">
                 <ul class="list-disc pl-5 text-gray-700 space-y-2">
@@ -71,7 +71,7 @@
         let isToneStarted = false;
 
         const samples = [
-            // --- 평가 항목 1-10: 기준 MIDI(원본) 있음, 모델 1-5 ---
+            // --- Pitch Correction ---
             {
                 id: 1, name: '평가 항목 01', files: {
                     '원본': 'audio/pitch_acc/eval1/midi.wav', '모델 1': 'audio/pitch_acc/eval1/brt_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval1/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval1/diff_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval1/melo_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval1/org_midi_wav.wav',
@@ -82,11 +82,10 @@
                     '원본': 'audio/pitch_acc/eval2/midi.wav', '모델 1': 'audio/pitch_acc/eval2/auto_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval2/diff_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval2/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval2/org_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval2/melo_midi_wav.wav',
                 }
             },
-            // ... 평가 항목 3부터 10까지 여기에 추가 ...
             { id: 3, name: '평가 항목 03', files: { '원본': 'audio/pitch_acc/eval3/midi.wav', '모델 1': 'audio/pitch_acc/eval3/org_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval3/brt_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval3/melo_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval3/auto_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval3/diff_midi_wav.wav',} },
             { id: 4, name: '평가 항목 04', files: { '원본': 'audio/pitch_acc/eval4/midi.wav', '모델 1': 'audio/pitch_acc/eval4/melo_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval4/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval4/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval4/diff_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval4/org_midi_wav.wav',} },
 
-            // --- 평가 항목 11-20: 원본 있음, 모델 1-4 ---
+            // --- Expression Preservation ---
             {
                 id: 5, name: '평가 항목 05', files: {
                     '원본': 'audio/expression_preserv/eval5/org_wav.wav', '모델 1': 'audio/expression_preserv/eval5/diff_wav.wav', '모델 2': 'audio/expression_preserv/eval5/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval5/melo_wav.wav', '모델 4': 'audio/expression_preserv/eval5/auto_wav.wav',
@@ -97,7 +96,6 @@
                     '원본': 'audio/expression_preserv/eval6/org_wav.wav', '모델 1': 'audio/expression_preserv/eval6/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval6/melo_wav.wav', '모델 3': 'audio/expression_preserv/eval6/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval6/auto_wav.wav',
                 }
             },
-            // ... 평가 항목 13부터 20까지 여기에 추가 ...
             { id: 7, name: '평가 항목 07', files: { '원본': 'audio/expression_preserv/eval7/org_wav.wav', '모델 1': 'audio/expression_preserv/eval7/melo_wav.wav', '모델 2': 'audio/expression_preserv/eval7/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval7/auto_wav.wav', '모델 4': 'audio/expression_preserv/eval7/diff_wav.wav', } },
             { id: 8, name: '평가 항목 08', files: { '원본': 'audio/expression_preserv/eval8/org_wav.wav', '모델 1': 'audio/expression_preserv/eval8/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval8/auto_wav.wav', '모델 3': 'audio/expression_preserv/eval8/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval8/melo_wav.wav', } },
         ];
@@ -135,7 +133,24 @@
         }).toDestination();
         
         const sampleContainer = document.getElementById('sample-container');
+        
+        // 제목을 생성하는 헬퍼 함수
+        function createTitle(text) {
+            const titleElement = document.createElement('h2');
+            titleElement.className = 'text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b-2 border-gray-200';
+            titleElement.textContent = text;
+            return titleElement;
+        }
+
         samples.forEach(sample => {
+            // --- ✅ 제목 추가 로직 ---
+            if (sample.id === 1) {
+                sampleContainer.appendChild(createTitle('음정 정확도 (Pitch Correction)'));
+            } else if (sample.id === 5) {
+                sampleContainer.appendChild(createTitle('표현 보존 (Expression Preservation)'));
+            }
+            // --- ---
+
             const sampleCard = document.createElement('div');
             sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg';
             
@@ -167,7 +182,6 @@
                 const isReference = displayName === '원본' || displayName === '기준 MIDI';
                 const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
                 
-                // ✅ 버튼 UI 수정: 아이콘/글씨 크기 반응형으로 변경, 중앙 정렬 강화
                 innerHTML += `<button data-sample-id="${sample.id}" data-model-name="${modelName}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span class="text-xs sm:text-sm truncate">${displayName}</span>
@@ -214,7 +228,6 @@
             }
 
             button.classList.add('playing');
-            // ✅ 재생 중 아이콘/글씨 크기도 동일하게 수정
             button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span class="text-xs sm:text-sm truncate">재생 중...</span>`;
             
             player.start();
@@ -232,7 +245,6 @@
         function resetButton(button) {
             const displayName = button.dataset.displayName;
             button.classList.remove('playing');
-            // ✅ 원래 버튼 UI도 동일하게 수정
             button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-xs sm:text-sm truncate">${displayName}</span>`;
         }
     </script>
