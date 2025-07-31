@@ -167,7 +167,14 @@
                 const sampleCard = document.createElement('div');
                 sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md';
                 
-                let innerHTML = `<h3 class="text-xl font-semibold text-gray-800 mb-6">${sample.name}</h3>
+                const description = sample.id <= 4 
+                    ? '<span class="text-red-600 font-semibold ml-4">음정 정확도 평가입니다! 음질은 평가에서 제외해주세요!</span>'
+                    : '<span class="text-red-600 font-semibold ml-4">표현 보존 평가입니다! 음정과 음질은 평가에서 제외해주세요!</span>';
+
+                let innerHTML = `<div class="flex items-center mb-6">
+                                    <h3 class="text-xl font-semibold text-gray-800">${sample.name}</h3>
+                                    ${description}
+                                 </div>
                                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-6">`;
 
                 let allModels;
