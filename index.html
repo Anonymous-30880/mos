@@ -42,7 +42,7 @@
 
     <div class="container mx-auto px-4 py-8 md:py-12">
         <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS (Mean Opinion Score) Test</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">MOS (Mean Opinion Score) Text</h1>
             <p class="mt-2 text-lg text-gray-600">각 샘플의 음성을 듣고 아래의 구글폼의 설명을 따라 평가해주세요</p>
             <div class="mt-4 text-left max-w-2xl mx-auto bg-blue-50 p-4 rounded-lg">
                 <ul class="list-disc pl-5 text-gray-700 space-y-2">
@@ -65,42 +65,34 @@
     </div>
 
     <script>
-        // --- 오디오 및 UI 컨트롤 스크립트 ---
-
         let currentlyPlaying = null; 
         let isToneStarted = false;
 
+        const pitchCorrectionReferences = [
+            { score: 1, file: 'audio/references/pa_1.wav' },
+            { score: 3, file: 'audio/references/pa_3.wav' },
+            { score: 5, file: 'audio/references/pa_5.wav' }
+        ];
+
         const samples = [
             // --- Pitch Correction ---
-            {
-                id: 1, name: '평가 항목 01', files: {
-                    '원본': 'audio/pitch_acc/eval1/midi.wav', '모델 1': 'audio/pitch_acc/eval1/brt_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval1/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval1/diff_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval1/melo_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval1/org_midi_wav.wav',
-                }
-            },
-            {
-                id: 2, name: '평가 항목 02', files: {
-                    '원본': 'audio/pitch_acc/eval2/midi.wav', '모델 1': 'audio/pitch_acc/eval2/auto_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval2/diff_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval2/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval2/org_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval2/melo_midi_wav.wav',
-                }
-            },
-            { id: 3, name: '평가 항목 03', files: { '원본': 'audio/pitch_acc/eval3/midi.wav', '모델 1': 'audio/pitch_acc/eval3/org_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval3/brt_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval3/melo_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval3/auto_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval3/diff_midi_wav.wav',} },
-            { id: 4, name: '평가 항목 04', files: { '원본': 'audio/pitch_acc/eval4/midi.wav', '모델 1': 'audio/pitch_acc/eval4/melo_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval4/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval4/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval4/diff_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval4/org_midi_wav.wav',} },
+            { id: 1, name: '평가 항목 01', files: { '원본': 'audio/pitch_acc/eval1/midi.wav', '모델 1': 'audio/pitch_acc/eval1/brt_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval1/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval1/diff_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval1/melo_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval1/org_midi_wav.wav' } },
+            { id: 2, name: '평가 항목 02', files: { '원본': 'audio/pitch_acc/eval2/midi.wav', '모델 1': 'audio/pitch_acc/eval2/auto_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval2/diff_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval2/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval2/org_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval2/melo_midi_wav.wav' } },
+            { id: 3, name: '평가 항목 03', files: { '원본': 'audio/pitch_acc/eval3/midi.wav', '모델 1': 'audio/pitch_acc/eval3/org_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval3/brt_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval3/melo_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval3/auto_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval3/diff_midi_wav.wav'} },
+            { id: 4, name: '평가 항목 04', files: { '원본': 'audio/pitch_acc/eval4/midi.wav', '모델 1': 'audio/pitch_acc/eval4/melo_midi_wav.wav', '모델 2': 'audio/pitch_acc/eval4/auto_midi_wav.wav', '모델 3': 'audio/pitch_acc/eval4/brt_midi_wav.wav', '모델 4': 'audio/pitch_acc/eval4/diff_midi_wav.wav', '모델 5': 'audio/pitch_acc/eval4/org_midi_wav.wav'} },
 
             // --- Expression Preservation ---
-            {
-                id: 5, name: '평가 항목 05', files: {
-                    '원본': 'audio/expression_preserv/eval5/org_wav.wav', '모델 1': 'audio/expression_preserv/eval5/diff_wav.wav', '모델 2': 'audio/expression_preserv/eval5/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval5/melo_wav.wav', '모델 4': 'audio/expression_preserv/eval5/auto_wav.wav',
-                }
-            },
-            {
-                id: 6, name: '평가 항목 06', files: {
-                    '원본': 'audio/expression_preserv/eval6/org_wav.wav', '모델 1': 'audio/expression_preserv/eval6/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval6/melo_wav.wav', '모델 3': 'audio/expression_preserv/eval6/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval6/auto_wav.wav',
-                }
-            },
-            { id: 7, name: '평가 항목 07', files: { '원본': 'audio/expression_preserv/eval7/org_wav.wav', '모델 1': 'audio/expression_preserv/eval7/melo_wav.wav', '모델 2': 'audio/expression_preserv/eval7/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval7/auto_wav.wav', '모델 4': 'audio/expression_preserv/eval7/diff_wav.wav', } },
-            { id: 8, name: '평가 항목 08', files: { '원본': 'audio/expression_preserv/eval8/org_wav.wav', '모델 1': 'audio/expression_preserv/eval8/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval8/auto_wav.wav', '모델 3': 'audio/expression_preserv/eval8/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval8/melo_wav.wav', } },
+            { id: 5, name: '평가 항목 05', files: { '원본': 'audio/expression_preserv/eval5/org_wav.wav', '모델 1': 'audio/expression_preserv/eval5/diff_wav.wav', '모델 2': 'audio/expression_preserv/eval5/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval5/melo_wav.wav', '모델 4': 'audio/expression_preserv/eval5/auto_wav.wav' } },
+            { id: 6, name: '평가 항목 06', files: { '원본': 'audio/expression_preserv/eval6/org_wav.wav', '모델 1': 'audio/expression_preserv/eval6/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval6/melo_wav.wav', '모델 3': 'audio/expression_preserv/eval6/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval6/auto_wav.wav' } },
+            { id: 7, name: '평가 항목 07', files: { '원본': 'audio/expression_preserv/eval7/org_wav.wav', '모델 1': 'audio/expression_preserv/eval7/melo_wav.wav', '모델 2': 'audio/expression_preserv/eval7/brt_wav.wav', '모델 3': 'audio/expression_preserv/eval7/auto_wav.wav', '모델 4': 'audio/expression_preserv/eval7/diff_wav.wav' } },
+            { id: 8, name: '평가 항목 08', files: { '원본': 'audio/expression_preserv/eval8/org_wav.wav', '모델 1': 'audio/expression_preserv/eval8/brt_wav.wav', '모델 2': 'audio/expression_preserv/eval8/auto_wav.wav', '모델 3': 'audio/expression_preserv/eval8/diff_wav.wav', '모델 4': 'audio/expression_preserv/eval8/melo_wav.wav' } },
         ];
 
         const fileMap = {};
+        pitchCorrectionReferences.forEach(ref => {
+            const key = `ref-pa-${ref.score}`;
+            fileMap[key] = ref.file;
+        });
         samples.forEach(sample => {
             for (const modelName in sample.files) {
                 if(sample.files[modelName]) {
@@ -134,7 +126,6 @@
         
         const sampleContainer = document.getElementById('sample-container');
         
-        // 제목을 생성하는 헬퍼 함수
         function createTitle(text) {
             const titleElement = document.createElement('h2');
             titleElement.className = 'text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b-2 border-gray-200';
@@ -142,14 +133,35 @@
             return titleElement;
         }
 
+        function createReferenceSection() {
+            const section = document.createElement('div');
+            section.className = 'bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6';
+            
+            let innerHTML = `<h4 class="text-lg font-semibold text-gray-800 mb-3">음정 정확도 점수 기준 샘플</h4>
+                             <p class="text-sm text-gray-600 mb-4">평가를 시작하기 전, 아래 샘플을 통해 각 점수가 의미하는 음질 수준을 확인해주세요.</p>
+                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">`;
+
+            pitchCorrectionReferences.forEach(ref => {
+                const displayName = `${ref.score}점 기준`;
+                const playerKey = `ref-pa-${ref.score}`;
+                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400 text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-sm">${displayName}</span>
+                              </button>`;
+            });
+
+            innerHTML += `</div>`;
+            section.innerHTML = innerHTML;
+            return section;
+        }
+
         samples.forEach(sample => {
-            // --- ✅ 제목 추가 로직 ---
             if (sample.id === 1) {
                 sampleContainer.appendChild(createTitle('음정 정확도 (Pitch Correction)'));
+                sampleContainer.appendChild(createReferenceSection());
             } else if (sample.id === 5) {
                 sampleContainer.appendChild(createTitle('표현 보존 (Expression Preservation)'));
             }
-            // --- ---
 
             const sampleCard = document.createElement('div');
             sampleCard.className = 'bg-white p-5 md:p-6 rounded-xl shadow-md transition-shadow duration-300 hover:shadow-lg';
@@ -157,32 +169,20 @@
             let innerHTML = `<div class="flex flex-col md:flex-row items-center justify-between"><h3 class="text-xl font-semibold text-gray-800 mb-4 md:mb-0">${sample.name}</h3><div class="w-full md:w-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">`;
 
             let allModels;
-
             if (sample.id <= 4) {
                 const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4', '모델 5'];
-                allModels = [
-                    {displayName: '기준 MIDI', modelName: '원본'}, 
-                    ...modelNames.map((model, i) => ({
-                        displayName: `Sample ${String.fromCharCode(65 + i)}`,
-                        modelName: model
-                    }))
-                ];
+                allModels = [ {displayName: '기준 MIDI', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
             } else {
                 const modelNames = ['모델 1', '모델 2', '모델 3', '모델 4'];
-                allModels = [
-                    {displayName: '원본', modelName: '원본'}, 
-                    ...modelNames.map((model, i) => ({
-                        displayName: `Sample ${String.fromCharCode(65 + i)}`,
-                        modelName: model
-                    }))
-                ];
+                allModels = [ {displayName: '원본', modelName: '원본'}, ...modelNames.map((model, i) => ({ displayName: `Sample ${String.fromCharCode(65 + i)}`, modelName: model })) ];
             }
 
             allModels.forEach(({displayName, modelName}) => {
                 const isReference = displayName === '원본' || displayName === '기준 MIDI';
                 const buttonColor = isReference ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+                const playerKey = `${sample.id}-${modelName}`;
                 
-                innerHTML += `<button data-sample-id="${sample.id}" data-model-name="${modelName}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                innerHTML += `<button data-player-key="${playerKey}" data-display-name="${displayName}" class="play-button flex items-center justify-center w-full px-2 sm:px-4 py-2.5 ${buttonColor} text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span class="text-xs sm:text-sm truncate">${displayName}</span>
                               </button>`;
@@ -198,26 +198,25 @@
             if (!button) return;
             if (!isToneStarted) { await Tone.start(); isToneStarted = true; }
             
-            const { sampleId, modelName } = button.dataset;
+            const { playerKey } = button.dataset;
             
             if (currentlyPlaying && currentlyPlaying.button !== button) {
-                const oldPlayer = players.player(`${currentlyPlaying.sampleId}-${currentlyPlaying.modelName}`);
+                const oldPlayer = players.player(currentlyPlaying.playerKey);
                 oldPlayer.stop();
                 resetButton(currentlyPlaying.button);
             }
 
-            const player = players.player(`${sampleId}-${modelName}`);
+            const player = players.player(playerKey);
             if (button.classList.contains('playing')) {
                 player.stop();
                 resetButton(button);
                 currentlyPlaying = null;
             } else {
-                playAudio(button, sampleId, modelName);
+                playAudio(button, playerKey);
             }
         });
 
-        function playAudio(button, sampleId, modelName) {
-            const playerKey = `${sampleId}-${modelName}`;
+        function playAudio(button, playerKey) {
             const player = players.player(playerKey);
 
             if (!player || !player.loaded) {
@@ -231,7 +230,7 @@
             button.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span class="text-xs sm:text-sm truncate">재생 중...</span>`;
             
             player.start();
-            currentlyPlaying = { button, sampleId, modelName };
+            currentlyPlaying = { button, playerKey };
 
             const audioDuration = player.buffer.duration;
             setTimeout(() => {
